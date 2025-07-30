@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"log"
-	"path/filepath"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -35,7 +34,6 @@ func createTables(db *sql.DB) {
 			location TEXT NOT NULL,
 			startTime DATETIME,
 			endTime DATETIME,
-			duration INTEGER DEFAULT 0
 		);
 	`
 
@@ -44,7 +42,6 @@ func createTables(db *sql.DB) {
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			name TEXT NOT NULL,
 			email TEXT NOT NULL,
-			password TEXT DEFAULT "password"
 		);
 	`
 
