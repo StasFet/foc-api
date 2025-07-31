@@ -1,4 +1,4 @@
-package control
+package internal
 
 import (
 	"database/sql"
@@ -33,7 +33,7 @@ func createTables(db *sql.DB) {
 			groupName TEXT NOT NULL,
 			location TEXT NOT NULL,
 			startTime DATETIME,
-			endTime DATETIME,
+			endTime DATETIME
 		);
 	`
 
@@ -41,7 +41,7 @@ func createTables(db *sql.DB) {
 		CREATE TABLE IF NOT EXISTS performers (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			name TEXT NOT NULL,
-			email TEXT NOT NULL,
+			email TEXT NOT NULL
 		);
 	`
 

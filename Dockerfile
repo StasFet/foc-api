@@ -1,11 +1,12 @@
 FROM golang:1.24-alpine
 
+RUN apk add --no-cache gcc musl-dev
+
 LABEL maintainer="st.fetisov@gmail.com"
 
 WORKDIR /app
 
-COPY go.* .
-
+COPY go.* ./
 
 RUN go mod download
 
@@ -13,8 +14,4 @@ COPY . .
 
 EXPOSE 8000
 
-ENTRYPOINT [ "sh", "-c", "go build -o app ./src/main.go && ./app" ]
-
-# build : "docker build -t go-foc-api-docker ."
-
-# run : "docker run go-foc-api-docker"
+ENTRYPOINT [ "sh", "-c", "go build -o app ./foc_api.go && ./app" ]

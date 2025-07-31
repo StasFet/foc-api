@@ -1,18 +1,9 @@
-package control
+package internal
 
 import (
 	"database/sql"
 	"time"
 )
-
-/*
-	Checklist for each entity:
-		X Create
-		X GetAll
-		X GetById
-		O Update
-		O Delete
-*/
 
 type Performance struct {
 	Id        int       `json:"id"`
@@ -128,13 +119,15 @@ func (dbw *DBWrapper) GetAllPerformers() ([]*Performer, error) {
 	return performers, nil
 }
 
-// returns all the performances associated with a particular performer
+// Returns all the performances associated with a particular performer
 func (dbw *DBWrapper) GetPerformancesByPerformer(performer *Performer) ([]*Performance, error) {
 	performerId := performer.Id
 	dbQuery := `
-		SELECT performance_id
-		FROM junctions
+		SELECT id, itemName, genreName, groupName, location, startTime, endTime
+		FROM performances AS p
+		JOIN junction AS j ON p.id = j.performance_id
 		WHERE performer_id = ?
+		ORDER BY p.id ASC
 	`
 
 	rows, err := dbw.db.Query(dbQuery, performerId)
@@ -146,12 +139,7 @@ func (dbw *DBWrapper) GetPerformancesByPerformer(performer *Performer) ([]*Perfo
 	for rows.Next() {
 		// scans the id of each performance
 		p := &Performance{}
-		err := rows.Scan(&p.Id)
-		if err != nil {
-			return nil, err
-		}
-		// finds the performance with the scanned id
-		p, err = dbw.GetPerformanceById(p.Id)
+		err := rows.Scan(&p.Id, &p.ItemName, &p.GenreName, &p.GroupName, &p.Location, &p.StartTime, &p.EndTime)
 		if err != nil {
 			return nil, err
 		}
@@ -161,13 +149,15 @@ func (dbw *DBWrapper) GetPerformancesByPerformer(performer *Performer) ([]*Perfo
 	return performances, nil
 }
 
-// returns all the performers associated with a particular performance
+// Returns all the performers associated with a particular performance
 func (dbw *DBWrapper) GetPerformersByPerformance(performance *Performance) ([]*Performer, error) {
 	performanceId := performance.Id
 	dbQuery := `
-		SELECT performer_id
-		FROM junction
-		WHERE performance_id = ?
+		SELECT id, name, email
+		FROM performers AS p
+		JOIN junction AS j ON p.id = j.performer_id
+		WHERE j.performance_id = ?
+		ORDER BY p.id ASC
 	`
 
 	rows, err := dbw.db.Query(dbQuery, performanceId)
@@ -177,15 +167,8 @@ func (dbw *DBWrapper) GetPerformersByPerformance(performance *Performance) ([]*P
 
 	performers := []*Performer{}
 	for rows.Next() {
-		// scan the id to each performer
 		p := &Performer{}
-		err := rows.Scan(&p.Id)
-		if err != nil {
-			return nil, err
-		}
-
-		// find the performer with the scanned id
-		p, err = dbw.GetPerformerById(p.Id)
+		err := rows.Scan(&p.Id, &p.Name, &p.Email)
 		if err != nil {
 			return nil, err
 		}
@@ -196,7 +179,7 @@ func (dbw *DBWrapper) GetPerformersByPerformance(performance *Performance) ([]*P
 	return performers, nil
 }
 
-// return the performance with the given id
+// Return the performance with the given id
 func (dbw *DBWrapper) GetPerformanceById(id int) (*Performance, error) {
 	dbQuery := `
 		SELECT *
@@ -213,6 +196,7 @@ func (dbw *DBWrapper) GetPerformanceById(id int) (*Performance, error) {
 	return p, nil
 }
 
+// Return the performer with the given id
 func (dbw *DBWrapper) GetPerformerById(id int) (*Performer, error) {
 	dbQuery := `
 		SELECT *
@@ -229,7 +213,7 @@ func (dbw *DBWrapper) GetPerformerById(id int) (*Performer, error) {
 	return p, nil
 }
 
-// return all the performances that match a certain query, NOT to be exposed to api endpoint
+// Return all the performances that match a certain query, NOT to be exposed to api endpoint
 func (dbw *DBWrapper) GetPerformancesUsingQuery(query string) ([]*Performance, error) {
 	rows, err := dbw.db.Query(query)
 	if err != nil {
@@ -249,7 +233,7 @@ func (dbw *DBWrapper) GetPerformancesUsingQuery(query string) ([]*Performance, e
 	return performances, nil
 }
 
-// get all the performers that match a given query. NOT to be exposed to any api endpoints.
+// Get all the performers that match a given query. NOT to be exposed to any api endpoints.
 func (dbw *DBWrapper) GetPerformerUsingQuery(query string) ([]*Performer, error) {
 	rows, err := dbw.db.Query(query)
 	if err != nil {
@@ -267,6 +251,84 @@ func (dbw *DBWrapper) GetPerformerUsingQuery(query string) ([]*Performer, error)
 	}
 
 	return performers, nil
+}
+
+// TODO: change from just delete to archive
+// Deletes the performance with the given id
+func (dbw *DBWrapper) DeletePerformanceById(id int) error {
+	dbQuery := `
+		DELETE FROM performances WHERE id = ?
+	`
+	_, err := dbw.db.Exec(dbQuery, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// TODO: change from just delete to archive
+// Deletes the performer with the given id
+func (dbw *DBWrapper) DeletePerformerById(id int) error {
+	dbQuery := `
+		DELETE FROM performers WHERE id = ?
+	`
+	_, err := dbw.db.Exec(dbQuery, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// Updates the performance with the given id to have the details of the given performance
+func (dbw *DBWrapper) UpdatePerformanceById(id int, p *Performance) (*Performance, error) {
+	dbQuery := `
+		UPDATE performances
+		SET itemName = ?, genreName = ?, groupName = ?, location = ?, startTime = ?, endTime = ?
+		WHERE id = ?
+	`
+
+	result, err := dbw.db.Exec(dbQuery, p.ItemName, p.GenreName, p.GroupName, p.Location, p.StartTime, p.EndTime)
+	if err != nil {
+		return nil, err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return nil, err
+	}
+
+	// error if no matching rows were found and updated
+	if rowsAffected == 0 {
+		return nil, sql.ErrNoRows
+	}
+
+	return p, nil
+}
+
+// Updates the performer with the given id to have the details of the given performer
+func (dbw *DBWrapper) UpdatePerformaerById(id int, p *Performer) (*Performer, error) {
+	dbQuery := `
+		UPDATE performers
+		SET name = ?, email = ?
+		WHERE id = ?
+	`
+
+	result, err := dbw.db.Exec(dbQuery, p.Name, p.Email)
+	if err != nil {
+		return nil, err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return nil, err
+	}
+
+	// error if no matching rows were found and updated
+	if rowsAffected == 0 {
+		return nil, sql.ErrNoRows
+	}
+
+	return p, nil
 }
 
 /*

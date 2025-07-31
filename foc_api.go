@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	internal "foc_api/internal"
 	"log"
 	"net/http"
 	"os"
@@ -10,29 +11,43 @@ import (
 var PORT string = os.Getenv("PORT")
 
 func main() {
-	db := InitDB("./database/test")
-	var dbw = CreateDBWrapper(db)
-	testPerformance, err := dbw.CreatePerformance(&Performance{GroupName: "Test"})
+	fmt.Println("foc_api.go started!")
+	db := internal.InitDB("database/db.sqlite")
+	fmt.Println("db initialised")
+	defer db.Close()
+
+	dbw := internal.CreateDBWrapper(db)
+
+	createdPerformer, err := dbw.CreatePerformer(&internal.Performer{Name: "Radit Siregar", Email: "rsire0@eq.edu.au"})
 	if err != nil {
 		log.Fatal(err)
 	}
+	fmt.Println("performer written into db!")
 
-	retrievePerformance, err := dbw.GetPerformanceById(testPerformance.Id)
+	p, err := dbw.GetPerformerById(createdPerformer.Id)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("Performance: %+v", retrievePerformance)
+	fmt.Printf("%+v\n", p)
 
+	allPerformers, err := dbw.GetAllPerformers()
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("All performers:")
+	for _, performer := range allPerformers {
+		fmt.Printf("%+v\n", performer)
+	}
 
 	return
 	if PORT == "" {
-		PORT = "3000"
+		PORT = "8000"
 	}
 
-	fmt.Println("Hello From main.go!")
+	fmt.Println("Hello From foc_api.go!")
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/test", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Welcome to the FOC REST API!")
 	})
 

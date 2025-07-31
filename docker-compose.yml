@@ -1,0 +1,15 @@
+version: "3.9"
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - CGO_ENABLED=1
+    develop:
+      watch:
+        - path: .
+          action: restart
+    volumes:
+      - ./database:/app/database/
