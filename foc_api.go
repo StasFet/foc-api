@@ -10,6 +10,21 @@ import (
 var PORT string = os.Getenv("PORT")
 
 func main() {
+	db := InitDB("./database/test")
+	var dbw = CreateDBWrapper(db)
+	testPerformance, err := dbw.CreatePerformance(&Performance{GroupName: "Test"})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	retrievePerformance, err := dbw.GetPerformanceById(testPerformance.Id)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("Performance: %+v", retrievePerformance)
+
+
+	return
 	if PORT == "" {
 		PORT = "3000"
 	}

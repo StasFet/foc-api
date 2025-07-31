@@ -1,4 +1,4 @@
-package main
+package control
 
 import (
 	"database/sql"
@@ -9,7 +9,7 @@ import (
 	Checklist for each entity:
 		X Create
 		X GetAll
-		O GetById
+		X GetById
 		O Update
 		O Delete
 */
@@ -128,6 +128,74 @@ func (dbw *DBWrapper) GetAllPerformers() ([]*Performer, error) {
 	return performers, nil
 }
 
+// returns all the performances associated with a particular performer
+func (dbw *DBWrapper) GetPerformancesByPerformer(performer *Performer) ([]*Performance, error) {
+	performerId := performer.Id
+	dbQuery := `
+		SELECT performance_id
+		FROM junctions
+		WHERE performer_id = ?
+	`
+
+	rows, err := dbw.db.Query(dbQuery, performerId)
+	if err != nil {
+		return nil, err
+	}
+
+	performances := []*Performance{}
+	for rows.Next() {
+		// scans the id of each performance
+		p := &Performance{}
+		err := rows.Scan(&p.Id)
+		if err != nil {
+			return nil, err
+		}
+		// finds the performance with the scanned id
+		p, err = dbw.GetPerformanceById(p.Id)
+		if err != nil {
+			return nil, err
+		}
+		performances = append(performances, p)
+	}
+
+	return performances, nil
+}
+
+// returns all the performers associated with a particular performance
+func (dbw *DBWrapper) GetPerformersByPerformance(performance *Performance) ([]*Performer, error) {
+	performanceId := performance.Id
+	dbQuery := `
+		SELECT performer_id
+		FROM junction
+		WHERE performance_id = ?
+	`
+
+	rows, err := dbw.db.Query(dbQuery, performanceId)
+	if err != nil {
+		return nil, err
+	}
+
+	performers := []*Performer{}
+	for rows.Next() {
+		// scan the id to each performer
+		p := &Performer{}
+		err := rows.Scan(&p.Id)
+		if err != nil {
+			return nil, err
+		}
+
+		// find the performer with the scanned id
+		p, err = dbw.GetPerformerById(p.Id)
+		if err != nil {
+			return nil, err
+		}
+
+		performers = append(performers, p)
+	}
+
+	return performers, nil
+}
+
 // return the performance with the given id
 func (dbw *DBWrapper) GetPerformanceById(id int) (*Performance, error) {
 	dbQuery := `
@@ -161,8 +229,8 @@ func (dbw *DBWrapper) GetPerformerById(id int) (*Performer, error) {
 	return p, nil
 }
 
-// return all the performances that match a certain query
-func (dbw *DBWrapper) GetRecordsUsingQuery(query string, returnType interface{}) ([]*Performance, error) {
+// return all the performances that match a certain query, NOT to be exposed to api endpoint
+func (dbw *DBWrapper) GetPerformancesUsingQuery(query string) ([]*Performance, error) {
 	rows, err := dbw.db.Query(query)
 	if err != nil {
 		return nil, err
@@ -179,6 +247,26 @@ func (dbw *DBWrapper) GetRecordsUsingQuery(query string, returnType interface{})
 	}
 
 	return performances, nil
+}
+
+// get all the performers that match a given query. NOT to be exposed to any api endpoints.
+func (dbw *DBWrapper) GetPerformerUsingQuery(query string) ([]*Performer, error) {
+	rows, err := dbw.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+
+	performers := []*Performer{}
+	for rows.Next() {
+		p := &Performer{}
+		err := rows.Scan(&p.Id, &p.Name, &p.Email)
+		if err != nil {
+			return nil, err
+		}
+		performers = append(performers, p)
+	}
+
+	return performers, nil
 }
 
 /*

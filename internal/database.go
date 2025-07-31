@@ -1,4 +1,4 @@
-package main
+package control
 
 import (
 	"database/sql"
@@ -7,7 +7,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func InitDB(filepath string) (*sql.DB) {
+func InitDB(filepath string) *sql.DB {
 	db, err := sql.Open("sqlite3", filepath)
 
 	// checks for errors within sql.Open()
