@@ -1,2 +1,5 @@
-app
+foc_api.exe
 database/
+.git
+.sqlite
+Dockerfile

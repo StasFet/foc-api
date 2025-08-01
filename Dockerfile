@@ -11,11 +11,10 @@ RUN go mod download
 
 COPY . .
 
-ENV CGO_ENABLED = 0
+ENV CGO_ENABLED=0
 ENV GOOS=linux
 
-RUN go build -ldflags="-s -w" -o app .
-
+RUN go build -ldflags="-s -w" -o  app .
 
 # Run stage
 FROM alpine:3.20 AS run-stage

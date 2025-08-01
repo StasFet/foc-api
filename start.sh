@@ -1,5 +1,5 @@
 #!/bin/bash
-
-docker compose up --build --watch
+export DOCKER_BUILDKIT=1
+docker compose up --build
 echo "Docker container shut down!"
 docker image prune -f         # removes dangling images

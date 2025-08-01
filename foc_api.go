@@ -18,7 +18,7 @@ func main() {
 
 	dbw := internal.CreateDBWrapper(db)
 
-	createdPerformer, err := dbw.CreatePerformer(&internal.Performer{Name: "Layla Chitoni", Email: "lchit6@eq.edu.au"})
+	createdPerformer, err := dbw.CreatePerformer(&internal.Performer{Name: "Edward Beaman", Email: "ebeam8@eq.edu.au"})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -29,15 +29,6 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Printf("%+v\n", p)
-
-	allPerformers, err := dbw.GetAllPerformers()
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("All performers:")
-	for _, performer := range allPerformers {
-		fmt.Printf("%+v\n", performer)
-	}
 
 	return
 	if PORT == "" {
