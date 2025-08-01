@@ -18,7 +18,7 @@ func main() {
 
 	dbw := internal.CreateDBWrapper(db)
 
-	createdPerformer, err := dbw.CreatePerformer(&internal.Performer{Name: "Radit Siregar", Email: "rsire0@eq.edu.au"})
+	createdPerformer, err := dbw.CreatePerformer(&internal.Performer{Name: "Layla Chitoni", Email: "lchit6@eq.edu.au"})
 	if err != nil {
 		log.Fatal(err)
 	}

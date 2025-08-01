@@ -12,9 +12,9 @@ Hello! This is just a little project to learn how to make a REST API. I haven't 
 ### Running This Application
 If for whatever reason you decide to run this application, you can easily do so with Docker Desktop. Simply open the root directory of this project in your terminal and run. 
 ```bash
-docker-compose up --build --watch
+docker-compose up --build
 ``` 
-Or alternatively use the `start.sh` script which will also prune dangling images for your convenience.
+Or alternatively use the `start.sh` script which will also prune dangling images for your convenience. Ensure you have docker-compose version >=2.22.0, or remove the `--watch` flag will not work.
 ```bash
 sh ./start.sh
 ```

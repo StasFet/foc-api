@@ -6,7 +6,7 @@ services:
       - "8000:8000"
     environment:
       - PORT=8000
-      - CGO_ENABLED=1
+      - CGO_ENABLED=0
     develop:
       watch:
         - path: .

@@ -3,12 +3,11 @@ package internal
 import (
 	"database/sql"
 	"log"
-
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
 
 func InitDB(filepath string) *sql.DB {
-	db, err := sql.Open("sqlite3", filepath)
+	db, err := sql.Open("sqlite", filepath)
 
 	// checks for errors within sql.Open()
 	if err != nil {

@@ -1,6 +1,5 @@
-FROM golang:1.24-alpine
-
-RUN apk add --no-cache gcc musl-dev
+# build stage
+FROM golang:1.24-alpine AS build-stage
 
 LABEL maintainer="st.fetisov@gmail.com"
 
@@ -12,6 +11,16 @@ RUN go mod download
 
 COPY . .
 
-EXPOSE 8000
+ENV CGO_ENABLED = 0
+ENV GOOS=linux
 
-ENTRYPOINT [ "sh", "-c", "go build -o app ./foc_api.go && ./app" ]
+RUN go build -ldflags="-s -w" -o app .
+
+
+# Run stage
+FROM alpine:3.20 AS run-stage
+
+WORKDIR /app
+COPY --from=build-stage /app/app .
+
+CMD ["./app"]
