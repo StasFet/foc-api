@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// TODO: add slices of performers to each performance
 type Performance struct {
 	Id        int       `json:"id"`
 	ItemName  string    `json:"itemName"`
@@ -16,6 +17,7 @@ type Performance struct {
 	Duration  int       `json:"duration"`
 }
 
+// TODO: add slices of performances to each performer
 type Performer struct {
 	Id    int    `json:"id"`
 	Name  string `json:"name"`
@@ -306,7 +308,7 @@ func (dbw *DBWrapper) UpdatePerformanceById(id int, p *Performance) (*Performanc
 }
 
 // Updates the performer with the given id to have the details of the given performer
-func (dbw *DBWrapper) UpdatePerformaerById(id int, p *Performer) (*Performer, error) {
+func (dbw *DBWrapper) UpdatePerformerById(id int, p *Performer) (*Performer, error) {
 	dbQuery := `
 		UPDATE performers
 		SET name = ?, email = ?

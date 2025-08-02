@@ -51,12 +51,12 @@ func (api *API) PerformanceHandler(w http.ResponseWriter, r *http.Request) {
 			// log.Println("Detected request for all performances!")
 			api.getAllPerformances(w, r)
 		} else {
-			api.GetPerformanceById(w, r)
+			api.getPerformanceById(w, r)
 		}
 	case http.MethodPost:
-		// create new performance
+		api.CreateNewPerformance(w, r)
 	case http.MethodPut:
-		// update performance of extracted id
+		api.UpdatePerformance(w, r)
 	case http.MethodDelete:
 		// delete performance of extracted id
 	}
@@ -70,12 +70,12 @@ func (api *API) PerformerHandler(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/performers" || r.URL.Path == "/performers/" {
 			api.getAllPerformers(w, r)
 		} else {
-			api.GetPerformerById(w, r)
+			api.getPerformerById(w, r)
 		}
 	case http.MethodPost:
-		// create new performer
+		api.CreateNewPerformer(w, r)
 	case http.MethodPut:
-		// update performer with extracted id
+		api.UpdatePerformer(w, r)
 	case http.MethodDelete:
 		// delete performer with extracted id
 	}
@@ -104,7 +104,7 @@ func (api *API) getAllPerformers(w http.ResponseWriter, r *http.Request) {
 }
 
 // GET /api/performances/:id - return performance with given ID
-func (api *API) GetPerformanceById(w http.ResponseWriter, r *http.Request) {
+func (api *API) getPerformanceById(w http.ResponseWriter, r *http.Request) {
 	id, err := api.extractId(r.URL.Path)
 	if err != nil {
 		api.respondError(w, http.StatusBadRequest, "Invalid ID")
@@ -121,7 +121,7 @@ func (api *API) GetPerformanceById(w http.ResponseWriter, r *http.Request) {
 }
 
 // GET /api/performers/:id - return performer with given ID
-func (api *API) GetPerformerById(w http.ResponseWriter, r *http.Request) {
+func (api *API) getPerformerById(w http.ResponseWriter, r *http.Request) {
 	id, err := api.extractId(r.URL.Path)
 	if err != nil {
 		api.respondError(w, http.StatusBadRequest, "Invalid ID")
@@ -135,4 +135,116 @@ func (api *API) GetPerformerById(w http.ResponseWriter, r *http.Request) {
 	}
 
 	api.respondJSON(w, http.StatusOK, map[string]*Performer{"performance": performer})
+}
+
+// POST /performances/ - Create a new performance
+func (api *API) CreateNewPerformance(w http.ResponseWriter, r *http.Request) {
+	var performance Performance
+	blankPerformance := Performance{}
+
+	err := json.NewDecoder(r.Body).Decode(&performance)
+	if err != nil {
+		api.respondError(w, http.StatusBadRequest, "Invalid JSON")
+		return
+	}
+
+	// TODO: some more validation
+	if performance == blankPerformance {
+		api.respondError(w, http.StatusBadRequest, "Cannot be blank")
+		return
+	}
+
+	newPerformance, err := api.wrapper.CreatePerformance(&performance)
+	if err != nil {
+		api.respondError(w, http.StatusInternalServerError, "Failed to create performance")
+	}
+
+	api.respondJSON(w, http.StatusOK, newPerformance)
+}
+
+// POST /performers/ - Create a new performer
+func (api *API) CreateNewPerformer(w http.ResponseWriter, r *http.Request) {
+	var performer Performer
+	blankPerformer := Performer{}
+
+	err := json.NewDecoder(r.Body).Decode(&performer)
+	if err != nil {
+		api.respondError(w, http.StatusBadRequest, "Invalid JSON")
+		return
+	}
+
+	// TODO: some more validation
+	if performer == blankPerformer {
+		api.respondError(w, http.StatusBadRequest, "Cannot Be Blank")
+		return
+	}
+
+	newPerformer, err := api.wrapper.CreatePerformer(&performer)
+	if err != nil {
+		api.respondError(w, http.StatusInternalServerError, "Failed to create performer")
+	}
+
+	api.respondJSON(w, http.StatusOK, newPerformer)
+}
+
+// PUT /performances/:id - updates the performance with the specified id
+func (api *API) UpdatePerformance(w http.ResponseWriter, r *http.Request) {
+	var performance Performance
+	blankPerformance := Performance{}
+
+	err := json.NewDecoder(r.Body).Decode(&performance)
+	if err != nil {
+		api.respondError(w, http.StatusBadRequest, "Invalid JSON")
+		return
+	}
+
+	id, err := api.extractId(r.URL.Path)
+	if err != nil {
+		api.respondError(w, http.StatusBadRequest, "Unable to parse id")
+	}
+
+	// TODO: more validation
+	if performance == blankPerformance {
+		api.respondError(w, http.StatusBadRequest, "Cannot be blank")
+		return
+	}
+
+	updatedPerformance, err := api.wrapper.UpdatePerformanceById(id, &performance)
+	if err != nil {
+		api.respondError(w, http.StatusInternalServerError, "Error updating performance")
+		return
+	}
+
+	api.respondJSON(w, http.StatusOK, updatedPerformance)
+}
+
+// PUT /performers/:id - updates the performer with the specified id
+func (api *API) UpdatePerformer(w http.ResponseWriter, r *http.Request) {
+	var performer Performer
+	blankPerformer := Performer{}
+
+	err := json.NewDecoder(r.Body).Decode(&performer)
+	if err != nil {
+		api.respondError(w, http.StatusBadRequest, "Invalid JSON")
+		return
+	}
+
+	id, err := api.extractId(r.URL.Path)
+	if err != nil {
+		api.respondError(w, http.StatusBadRequest, "Unable to parse id")
+	}
+
+	// TODO: more validation
+	if performer == blankPerformer {
+		api.respondError(w, http.StatusBadRequest, "Cannot be blank")
+		return
+	}
+
+	updatedPerformer, err := api.wrapper.UpdatePerformerById(id, &performer)
+	if err != nil {
+		api.respondError(w, http.StatusInternalServerError, "Error updating performer")
+		return
+	}
+
+	api.respondJSON(w, http.StatusOK, updatedPerformer)
 }
