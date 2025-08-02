@@ -7,9 +7,10 @@ services:
     environment:
       - PORT=8000
       - CGO_ENABLED=0
+      - DOCKER_BUILDKIT=1
     develop:
       watch:
         - path: .
-          action: restart
+          action: rebuild
     volumes:
       - ./database:/app/database/

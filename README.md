@@ -21,4 +21,15 @@ sh ./start.sh
 Enjoy!
 ## API Map
 
-! UNDER CONSTRUCTION !
+| Path                       | Description                          |
+| -------------------------- | ------------------------------------ |
+| `GET /performers`          | Returns all the performers           |
+| `GET /performers/:id`      | Returns the performer with id `id`   |
+| `GET /performances`        | Returns all the performances         |
+| `GET /performances/:id`    | Returns the performance with id `id` |
+| `POST /performers`         | Creates a new performer              |
+| `POST /performances`       | Creates a new performance            |
+| `PUT /performers/:id`      | Updates the performer with id `id`   |
+| `PUT /performances/:id`    | Updates the performance with id `id` |
+| `DELETE /performers/:id`   | Deletes the performance with id `id` |
+| `DELETE /performances/:id` | Deletes the performance with id `id` |

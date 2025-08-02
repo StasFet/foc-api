@@ -3,3 +3,4 @@ database/
 .git
 .sqlite
 Dockerfile
+app.exe

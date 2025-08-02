@@ -11,26 +11,12 @@ import (
 var PORT string = os.Getenv("PORT")
 
 func main() {
-	fmt.Println("foc_api.go started!")
 	db := internal.InitDB("database/db.sqlite")
-	fmt.Println("db initialised")
 	defer db.Close()
 
-	dbw := internal.CreateDBWrapper(db)
+	wrapper := internal.CreateDBWrapper(db)
+	api := internal.NewAPI(wrapper)
 
-	createdPerformer, err := dbw.CreatePerformer(&internal.Performer{Name: "Edward Beaman", Email: "ebeam8@eq.edu.au"})
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("performer written into db!")
-
-	p, err := dbw.GetPerformerById(createdPerformer.Id)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("%+v\n", p)
-
-	return
 	if PORT == "" {
 		PORT = "8000"
 	}
@@ -38,10 +24,19 @@ func main() {
 	fmt.Println("Hello From foc_api.go!")
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/test", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Welcome to the FOC REST API!")
-	})
+	mux.HandleFunc("/performances", api.PerformanceHandler)
+	mux.HandleFunc("/performances/", api.PerformanceHandler)
 
-	fmt.Printf("Listening on port %s", PORT)
+	mux.HandleFunc("/performers", api.PerformerHandler)
+	mux.HandleFunc("/performers/", api.PerformerHandler)
+
+	mux.HandleFunc("/test", testRequest)
+	mux.HandleFunc("/test/", testRequest)
+
+	fmt.Printf("Listening on port %s\n", PORT)
 	log.Fatal(http.ListenAndServe(":"+PORT, mux))
+}
+
+func testRequest(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Welcome to the FOC REST API! request path: %s", r.URL.RawPath)
 }
