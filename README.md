@@ -12,11 +12,7 @@ Hello! This is just a little project to learn how to make a REST API. I haven't 
 ### Running This Application
 If for whatever reason you decide to run this application, you can easily do so with Docker Desktop. Simply open the root directory of this project in your terminal and run. 
 ```bash
-docker-compose up --build
-``` 
-Or alternatively use the `start.sh` script which will also prune dangling images for your convenience. Ensure you have docker-compose version >=2.22.0, or remove the `--watch` flag will not work.
-```bash
-sh ./start.sh
+docker compose up --build
 ```
 Enjoy!
 ## API Map
@@ -25,8 +21,10 @@ Enjoy!
 | -------------------------- | ------------------------------------ |
 | `GET /performers`          | Returns all the performers           |
 | `GET /performers/:id`      | Returns the performer with id `id`   |
+| `GET /performers/:id/performances` | Returns the performances of performer with id `id` |
 | `GET /performances`        | Returns all the performances         |
 | `GET /performances/:id`    | Returns the performance with id `id` |
+| `GET /performances/:id/performers` | Returns the performers of performance with id `id` |
 | `POST /performers`         | Creates a new performer              |
 | `POST /performances`       | Creates a new performance            |
 | `PUT /performers/:id`      | Updates the performer with id `id`   |

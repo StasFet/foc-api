@@ -2,6 +2,7 @@ package internal
 
 import (
 	"database/sql"
+	"errors"
 	"time"
 )
 
@@ -122,8 +123,7 @@ func (dbw *DBWrapper) GetAllPerformers() ([]*Performer, error) {
 }
 
 // Returns all the performances associated with a particular performer
-func (dbw *DBWrapper) GetPerformancesByPerformer(performer *Performer) ([]*Performance, error) {
-	performerId := performer.Id
+func (dbw *DBWrapper) GetPerformancesByPerformerId(performerId int) ([]*Performance, error) {
 	dbQuery := `
 		SELECT id, itemName, genreName, groupName, location, startTime, endTime
 		FROM performances AS p
@@ -152,8 +152,7 @@ func (dbw *DBWrapper) GetPerformancesByPerformer(performer *Performer) ([]*Perfo
 }
 
 // Returns all the performers associated with a particular performance
-func (dbw *DBWrapper) GetPerformersByPerformance(performance *Performance) ([]*Performer, error) {
-	performanceId := performance.Id
+func (dbw *DBWrapper) GetPerformersByPerformanceId(performanceId int) ([]*Performer, error) {
 	dbQuery := `
 		SELECT id, name, email
 		FROM performers AS p
@@ -259,7 +258,7 @@ func (dbw *DBWrapper) GetPerformerUsingQuery(query string) ([]*Performer, error)
 // Deletes the performance with the given id
 func (dbw *DBWrapper) DeletePerformanceById(id int) error {
 	dbQuery := `
-		DELETE FROM performances WHERE id = ?
+		DELETE FROM performances WHERE id = ?;
 	`
 	_, err := dbw.db.Exec(dbQuery, id)
 	if err != nil {
@@ -272,7 +271,7 @@ func (dbw *DBWrapper) DeletePerformanceById(id int) error {
 // Deletes the performer with the given id
 func (dbw *DBWrapper) DeletePerformerById(id int) error {
 	dbQuery := `
-		DELETE FROM performers WHERE id = ?
+		DELETE FROM performers WHERE id = ?;
 	`
 	_, err := dbw.db.Exec(dbQuery, id)
 	if err != nil {
@@ -331,6 +330,32 @@ func (dbw *DBWrapper) UpdatePerformerById(id int, p *Performer) (*Performer, err
 	}
 
 	return p, nil
+}
+
+// creates a performer:performance relationship
+func (dbw *DBWrapper) CreateJunction(performerId, performanceId int) error {
+	dbQuery := `
+		INSERT INTO junction (performer_id, performance_id)
+		VALUES (?, ?)
+	`
+
+	err := dbw.db.QueryRow(dbQuery, performerId, performanceId)
+	if err != nil {
+		return errors.New("Error creating junction")
+	}
+	return nil
+}
+
+// deletes the performerId:performanceId pair
+func (dbw *DBWrapper) DeleteJunction(performerId, performanceId int) error {
+	dbQuery := `
+		DELETE FROM junction WHERE performer_id = ? AND performance_id = ?;
+	`
+	_, err := dbw.db.Exec(dbQuery)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 /*
