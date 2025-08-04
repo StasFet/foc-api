@@ -42,6 +42,11 @@ func (api *API) extractId(path string) (int, error) {
 	return strconv.Atoi(parts[1])
 }
 
+func pathLength(path string) int {
+	parts := strings.Split(strings.Trim(path, "/"), "/")
+	return len(parts)
+}
+
 // Handles all requests related to performances
 func (api *API) PerformanceHandler(w http.ResponseWriter, r *http.Request) {
 	// log.Println(strconv.Itoa(log.Ltime) + ": Performance Request Incoming " + r.Method + " " + r.URL.RawPath)
@@ -50,6 +55,8 @@ func (api *API) PerformanceHandler(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/performances" || r.URL.Path == "/performances/" {
 			// log.Println("Detected request for all performances!")
 			api.getAllPerformances(w, r)
+		} else if pathLength(r.URL.Path) > 2 {
+			api.GetPerformersByPerformanceId(w, r)
 		} else {
 			api.getPerformanceById(w, r)
 		}
@@ -69,6 +76,8 @@ func (api *API) PerformerHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		if r.URL.Path == "/performers" || r.URL.Path == "/performers/" {
 			api.getAllPerformers(w, r)
+		} else if pathLength(r.URL.Path) > 2 { // if pathLength >
+			api.GetPerformancesByPerformerId(w, r)
 		} else {
 			api.getPerformerById(w, r)
 		}
@@ -127,7 +136,7 @@ func (api *API) getPerformanceById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	api.respondJSON(w, http.StatusOK, map[string]*Performance{"performance": performance})
+	api.respondJSON(w, http.StatusOK, performance)
 }
 
 // GET /performers/:id - return performer with given ID
@@ -145,7 +154,7 @@ func (api *API) getPerformerById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	api.respondJSON(w, http.StatusOK, map[string]*Performer{"performance": performer})
+	api.respondJSON(w, http.StatusOK, performer)
 }
 
 // GET /performances/:id/performers - returns performers associated to the performance with the specified id
@@ -162,11 +171,11 @@ func (api *API) GetPerformersByPerformanceId(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	api.respondJSON(w, http.StatusOK, performers)
+	api.respondJSON(w, http.StatusOK, map[string][]*Performer{"performers": performers})
 }
 
 // GET /performances/:id/performers - returns performers associated to the performance with the specified id
-func (api *API) GetPerformanceByPerformerId(w http.ResponseWriter, r *http.Request) {
+func (api *API) GetPerformancesByPerformerId(w http.ResponseWriter, r *http.Request) {
 	id, err := api.extractId(r.URL.Path)
 	if err != nil {
 		api.respondError(w, http.StatusBadRequest, "Error extracting id")

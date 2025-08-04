@@ -75,7 +75,7 @@ func (dbw *DBWrapper) GetAllPerformances() ([]*Performance, error) {
 	dbQuery := `
 		SELECT *
 		FROM performances
-		ORDER BY id startTime ASC
+		ORDER BY id ASC
 	`
 
 	rows, err := dbw.db.Query(dbQuery)
@@ -128,7 +128,7 @@ func (dbw *DBWrapper) GetPerformancesByPerformerId(performerId int) ([]*Performa
 		SELECT id, itemName, genreName, groupName, location, startTime, endTime
 		FROM performances AS p
 		JOIN junction AS j ON p.id = j.performance_id
-		WHERE performer_id = ?
+		WHERE j.performer_id = ?
 		ORDER BY p.id ASC
 	`
 
@@ -339,8 +339,8 @@ func (dbw *DBWrapper) CreateJunction(performerId, performanceId int) error {
 		VALUES (?, ?)
 	`
 
-	err := dbw.db.QueryRow(dbQuery, performerId, performanceId)
-	if err != nil {
+	row := dbw.db.QueryRow(dbQuery, performerId, performanceId)
+	if row == nil {
 		return errors.New("Error creating junction")
 	}
 	return nil
