@@ -11,7 +11,10 @@ import (
 var PORT string = os.Getenv("PORT")
 
 func main() {
-	db := internal.InitDB("database/db.sqlite")
+	db, err := internal.InitDB("database/db.sqlite")
+	if err != nil {
+		log.Fatalf("Database initialisation failed: %v", err)
+	}
 	defer db.Close()
 
 	wrapper := internal.CreateDBWrapper(db)

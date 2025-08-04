@@ -207,7 +207,7 @@ func (dbw *DBWrapper) GetPerformerById(id int) (*Performer, error) {
 
 	p := &Performer{}
 	err := dbw.db.QueryRow(dbQuery, id).
-		Scan(&p.Id, &p.Email, &p.Name)
+		Scan(&p.Id, &p.Name, &p.Email)
 	if err != nil {
 		return nil, err
 	}

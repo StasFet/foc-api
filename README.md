@@ -10,11 +10,18 @@ Hello! This is just a little project to learn how to make a REST API. I haven't 
 - Docker/Docker-Compose
 
 ### Running This Application
-If for whatever reason you decide to run this application, you can easily do so with Docker Desktop. Simply open the root directory of this project in your terminal and run. 
+If for whatever reason you decide to run this application, you can easily do so with Docker Desktop. Simply open the root directory of this project in your terminal and run the following command:
 ```bash
 docker compose up --build
 ```
 Enjoy!
+
+### Running Tests
+To run the unit tests and ensure everything works, you can run the following command:
+```bash
+go test ./internal/
+```
+
 ## API Map
 
 | Path                       | Description                          |
@@ -27,7 +34,9 @@ Enjoy!
 | `GET /performances/:id/performers` | Returns the performers of performance with id `id` |
 | `POST /performers`         | Creates a new performer              |
 | `POST /performances`       | Creates a new performance            |
+| `POST /junctions`          | Creates a performer:performance pair |
 | `PUT /performers/:id`      | Updates the performer with id `id`   |
 | `PUT /performances/:id`    | Updates the performance with id `id` |
 | `DELETE /performers/:id`   | Deletes the performance with id `id` |
 | `DELETE /performances/:id` | Deletes the performance with id `id` |
+| `DELETE /junctions/:id1/:id2` | Deletes the performer:performance pair with ids id1:id2 |

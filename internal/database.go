@@ -2,25 +2,32 @@ package internal
 
 import (
 	"database/sql"
+	"errors"
 	"log"
+
 	_ "modernc.org/sqlite"
 )
 
-func InitDB(filepath string) *sql.DB {
+func InitDB(filepath string) (*sql.DB, error) {
 	db, err := sql.Open("sqlite", filepath)
 
 	// checks for errors within sql.Open()
 	if err != nil {
-		log.Fatal(err)
+		return nil, errors.New("Error opening the database")
+	}
+
+	// checks that db is not nil so we avoid null pointer dereference
+	if db == nil {
+		return nil, errors.New("Database is null!")
 	}
 
 	// checks for errors when pinging the db
 	if err = db.Ping(); err != nil {
-		log.Fatal(err)
+		return nil, errors.New("Error communicating with the database")
 	}
 
 	createTables(db)
-	return db
+	return db, nil
 }
 
 func createTables(db *sql.DB) {
