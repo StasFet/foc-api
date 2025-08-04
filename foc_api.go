@@ -33,6 +33,9 @@ func main() {
 	mux.HandleFunc("/test", testRequest)
 	mux.HandleFunc("/test/", testRequest)
 
+	mux.HandleFunc("/junctions", api.JunctionHandler)
+	mux.HandleFunc("/junctions/", api.JunctionHandler)
+
 	fmt.Printf("Listening on port %s\n", PORT)
 	log.Fatal(http.ListenAndServe(":"+PORT, mux))
 }
