@@ -2,6 +2,7 @@ package internal_test
 
 import (
 	internal "foc_api/internal"
+	"strconv"
 	"testing"
 	"time"
 
@@ -9,8 +10,6 @@ import (
 	"github.com/stretchr/testify/require"
 	_ "modernc.org/sqlite"
 )
-
-//aDIeu
 
 func getTestPerformance() *internal.Performance {
 	testTime1 := time.Now()
@@ -30,19 +29,45 @@ func getTestPerformance() *internal.Performance {
 
 func getTestPerformer() *internal.Performer {
 	return &internal.Performer{
-		Name:  "TestFirstName, TestLastName",
+		Name:  "FirstName, LastName",
 		Email: "test@test.com",
 	}
 }
 
+func getTestPerformances(amount int) []*internal.Performance {
+	template := getTestPerformance()
+
+	res := []*internal.Performance{}
+	for i := range amount {
+		res = append(res, &internal.Performance{ItemName: template.ItemName + strconv.Itoa(i)})
+	}
+
+	return res
+}
+
+func getTestPerformers(amount int) []*internal.Performer {
+	template := getTestPerformer()
+
+	res := []*internal.Performer{}
+	for i := range amount {
+		res = append(res, &internal.Performer{Name: template.Name + strconv.Itoa(i), Email: template.Email + strconv.Itoa(i)})
+	}
+
+	return res
+}
+
 func TestCreatePerformance(t *testing.T) {
+	// arrange
 	db := setUpTestDB(t)
 	defer db.Close()
 	dbw := internal.CreateDBWrapper(db)
 
 	testPerformance := getTestPerformance()
 
+	// act
 	result, err := dbw.CreatePerformance(testPerformance)
+
+	// assert
 	require.NoError(t, err, "CreatePerformance() has failed: %v", err)
 
 	// main testable thing about createperformance is that it returns an id
@@ -51,20 +76,45 @@ func TestCreatePerformance(t *testing.T) {
 }
 
 func TestCreatePerformer(t *testing.T) {
+	// arrange
 	db := setUpTestDB(t)
 	defer db.Close()
 	dbw := internal.CreateDBWrapper(db)
 
 	testPerformer := getTestPerformer()
 
+	// act
 	result, err := dbw.CreatePerformer(testPerformer)
+
+	//assert
 	require.NoError(t, err, "CreatePerformer() has failed: %v", err)
 
 	assert.IsType(t, 0, result.Id, "Performer ID not assigned correctly")
 	assert.NotEqual(t, result.Id, 0, "Performer ID assigned as 0")
 }
 
+func TestCreateJunction(t *testing.T) {
+	// arrange
+	db := setUpTestDB(t)
+	defer db.Close()
+	dbw := internal.CreateDBWrapper(db)
+
+	testPerformer := getTestPerformer()
+	testPerformance := getTestPerformance()
+
+	testPerformer, err := dbw.CreatePerformer(testPerformer)
+	require.NoError(t, err, "CreatePerformer failed: %v", err)
+
+	expected, err := dbw.CreatePerformance(testPerformance)
+	require.NoError(t, err, "CreatePerformance() failed: %v", err)
+
+	// act
+	err = dbw.CreateJunction(testPerformer.Id, expected.Id)
+	require.NoError(t, err, "CreateJunction() failed: %v", err)
+}
+
 func TestGetPerformance(t *testing.T) {
+	// arrange
 	db := setUpTestDB(t)
 	defer db.Close()
 	dbw := internal.CreateDBWrapper(db)
@@ -76,7 +126,10 @@ func TestGetPerformance(t *testing.T) {
 
 	expected = performance
 
+	// act
 	actual, err := dbw.GetPerformanceById(expected.Id)
+
+	// assert
 	require.NoError(t, err, "GetPerformanceById() has failed: %v", err)
 
 	assert.Equal(t, expected.Id, actual.Id)
@@ -92,6 +145,7 @@ func TestGetPerformance(t *testing.T) {
 }
 
 func TestGetPerformer(t *testing.T) {
+	//arrange
 	db := setUpTestDB(t)
 	defer db.Close()
 	dbw := internal.CreateDBWrapper(db)
@@ -101,8 +155,86 @@ func TestGetPerformer(t *testing.T) {
 	expected, err := dbw.CreatePerformer(expected)
 	require.NoError(t, err, "CreatePerformer() has failed: %v", err)
 
+	// act
 	actual, err := dbw.GetPerformerById(expected.Id)
-	require.NoError(t, err, "GerPerformerById() has failed: %v", err)
 
+	// assert
+	require.NoError(t, err, "GerPerformerById() has failed: %v", err)
 	assert.Equal(t, expected, actual, "Expected and Actual performers not equal")
+}
+
+func TestGetAllPerformances(t *testing.T) {
+	// arrange
+	db := setUpTestDB(t)
+	defer db.Close()
+	dbw := internal.CreateDBWrapper(db)
+
+	expected := getTestPerformances(10)
+	for i, val := range expected {
+		p, err := dbw.CreatePerformance(val)
+		require.NoError(t, err, "Error creating performance: %v", err)
+		expected[i] = p
+	}
+
+	// act
+	actual, err := dbw.GetAllPerformances()
+	require.NoError(t, err, "GetAllPerformances() failed: %v", err)
+
+	// assert
+	for i := range expected {
+		assert.Equal(t, expected[i], actual[i], "Expected and ")
+	}
+}
+
+func TestGetAllPerformers(t *testing.T) {
+	// arrange
+	db := setUpTestDB(t)
+	defer db.Close()
+	dbw := internal.CreateDBWrapper(db)
+
+	expected := getTestPerformers(10)
+	for i, val := range expected {
+		p, err := dbw.CreatePerformer(val)
+		require.NoError(t, err, "CreatePerformer() failed %v", err)
+		expected[i] = p
+	}
+
+	// act
+	actual, err := dbw.GetAllPerformances()
+	require.NoError(t, err, "GetAllPerformances() failed: %v", err)
+
+	// assert
+	for i := range expected {
+		assert.Equal(t, expected[i], actual[i], "Expected and ")
+	}
+}
+
+func TestGetPerformancesByPerformerId(t *testing.T) {
+	// arrange
+	db := setUpTestDB(t)
+	defer db.Close()
+	dbw := internal.CreateDBWrapper(db)
+
+	testPerformer := getTestPerformer()
+	expected := getTestPerformances(3)
+
+	testPerformer, err := dbw.CreatePerformer(testPerformer)
+	require.NoError(t, err, "CreatePerformer() failed: %v", err)
+
+	for i, val := range expected {
+		expected[i], err = dbw.CreatePerformance(val)
+		require.NoError(t, err, "CreatePerformance() failed: %v", err)
+	}
+
+	for _, val := range expected {
+		err := dbw.CreateJunction(testPerformer.Id, val.Id)
+		require.NoError(t, err, "CreateJunction() failed: %v", err)
+	}
+
+	// act
+	actual, err := dbw.GetPerformancesByPerformerId(testPerformer.Id)
+	require.NoError(t, err, "GetPerformancesByPerformerId failed: %v", err)
+
+	assert.True(t, (len(expected) == len(actual)), "Number of returns not equal")
+
 }

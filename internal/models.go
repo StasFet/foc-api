@@ -385,3 +385,11 @@ func getNextPerformer(rows *sql.Rows) (*Performer, error) {
 	}
 	return p, nil
 }
+
+// validates the contents of a performance and returns its validity
+func validatePerformance(p *Performance) bool {
+	if (len([]rune(p.ItemName)) < 2 || len([]rune(p.ItemName)) > 32) {
+		return false
+	}
+	return true
+}
