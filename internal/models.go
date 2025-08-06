@@ -339,8 +339,8 @@ func (dbw *DBWrapper) CreateJunction(performerId, performanceId int) error {
 		VALUES (?, ?)
 	`
 
-	row := dbw.db.QueryRow(dbQuery, performerId, performanceId)
-	if row == nil {
+	_, err := dbw.db.Exec(dbQuery, performerId, performanceId)
+	if err != nil {
 		return errors.New("Error creating junction")
 	}
 	return nil
@@ -388,8 +388,9 @@ func getNextPerformer(rows *sql.Rows) (*Performer, error) {
 
 // validates the contents of a performance and returns its validity
 func validatePerformance(p *Performance) bool {
-	if (len([]rune(p.ItemName)) < 2 || len([]rune(p.ItemName)) > 32) {
+	if len([]rune(p.ItemName)) < 2 || len([]rune(p.ItemName)) > 32 {
 		return false
 	}
 	return true
+	// TODO: this
 }

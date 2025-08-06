@@ -96,7 +96,7 @@ func (api *API) JunctionHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		api.createJunction(w, r)
 	case http.MethodDelete:
-		// delete existing junction
+		api.deleteJunction(w, r)
 	}
 }
 

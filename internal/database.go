@@ -3,7 +3,7 @@ package internal
 import (
 	"database/sql"
 	"errors"
-	"log"
+	"fmt"
 
 	_ "modernc.org/sqlite"
 )
@@ -13,24 +13,27 @@ func InitDB(filepath string) (*sql.DB, error) {
 
 	// checks for errors within sql.Open()
 	if err != nil {
-		return nil, errors.New("Error opening the database")
+		return nil, errors.New("error opening the database")
 	}
 
 	// checks that db is not nil so we avoid null pointer dereference
 	if db == nil {
-		return nil, errors.New("Database is null!")
+		return nil, errors.New("database is null")
 	}
 
 	// checks for errors when pinging the db
 	if err = db.Ping(); err != nil {
-		return nil, errors.New("Error communicating with the database")
+		return nil, errors.New("error communicating with the database")
 	}
 
-	createTables(db)
+	err = createTables(db)
+	if err != nil {
+		return nil, err
+	}
 	return db, nil
 }
 
-func createTables(db *sql.DB) {
+func createTables(db *sql.DB) error {
 	createPerformancesString := `
 		CREATE TABLE IF NOT EXISTS performances (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -64,18 +67,19 @@ func createTables(db *sql.DB) {
 	// creates performances table
 	_, err := db.Exec(createPerformancesString)
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("failed to create performances table: %v", err)
 	}
 
 	// creates performers table
 	_, err = db.Exec(createPerformersString)
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("failed to create performers table: %v", err)
 	}
 
 	// creates junction table that stores pairs of performers and performances
 	_, err = db.Exec(createJunctionString)
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("failed to create junctions table: %v", err)
 	}
+	return nil
 }

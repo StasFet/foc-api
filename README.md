@@ -39,4 +39,4 @@ go test ./internal/
 | `PUT /performances/:id`    | Updates the performance with id `id` |
 | `DELETE /performers/:id`   | Deletes the performance with id `id` |
 | `DELETE /performances/:id` | Deletes the performance with id `id` |
-| `DELETE /junctions/:id1/:id2` | Deletes the performer:performance pair with ids id1:id2 |
+| `DELETE /junctions/:id1/:id2` | Deletes the performer:performance pair with ids `id1:id2` |

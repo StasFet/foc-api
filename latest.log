@@ -1,0 +1,24 @@
+=== RUN   TestInitDB
+--- PASS: TestInitDB (0.00s)
+=== RUN   TestCreatePerformance
+--- PASS: TestCreatePerformance (0.00s)
+=== RUN   TestCreatePerformer
+--- PASS: TestCreatePerformer (0.00s)
+=== RUN   TestCreateJunction
+--- PASS: TestCreateJunction (0.00s)
+=== RUN   TestGetPerformance
+--- PASS: TestGetPerformance (0.00s)
+=== RUN   TestGetPerformer
+--- PASS: TestGetPerformer (0.00s)
+=== RUN   TestGetAllPerformances
+--- PASS: TestGetAllPerformances (0.00s)
+=== RUN   TestGetAllPerformers
+--- PASS: TestGetAllPerformers (0.00s)
+=== RUN   TestGetPerformancesByPerformerId
+--- PASS: TestGetPerformancesByPerformerId (0.00s)
+=== RUN   TestGetPerformersByPerformanceId
+--- PASS: TestGetPerformersByPerformanceId (0.00s)
+=== RUN   TestDeletePerformanceUsingId
+--- PASS: TestDeletePerformanceUsingId (0.00s)
+PASS
+ok  	foc_api/internal	0.256s

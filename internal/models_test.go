@@ -181,8 +181,9 @@ func TestGetAllPerformances(t *testing.T) {
 	require.NoError(t, err, "GetAllPerformances() failed: %v", err)
 
 	// assert
+
 	for i := range expected {
-		assert.Equal(t, expected[i], actual[i], "Expected and ")
+		assert.Equal(t, expected[i], actual[i], "Expected performances and actual values ")
 	}
 }
 
@@ -200,10 +201,11 @@ func TestGetAllPerformers(t *testing.T) {
 	}
 
 	// act
-	actual, err := dbw.GetAllPerformances()
-	require.NoError(t, err, "GetAllPerformances() failed: %v", err)
+	actual, err := dbw.GetAllPerformers()
+	require.NoError(t, err, "GetAllPerformers() failed: %v", err)
 
 	// assert
+	assert.True(t, (len(expected) == len(actual)), "Number of returns not equal")
 	for i := range expected {
 		assert.Equal(t, expected[i], actual[i], "Expected and ")
 	}
@@ -233,8 +235,65 @@ func TestGetPerformancesByPerformerId(t *testing.T) {
 
 	// act
 	actual, err := dbw.GetPerformancesByPerformerId(testPerformer.Id)
-	require.NoError(t, err, "GetPerformancesByPerformerId failed: %v", err)
+	require.NoError(t, err, "GetPerformancesByPerformerId() failed: %v", err)
 
+	// assert
 	assert.True(t, (len(expected) == len(actual)), "Number of returns not equal")
+	for i, val := range actual {
+		assert.Equal(t, val.Id, expected[i].Id, "Expected performances not equal to actual")
+		assert.Equal(t, val.ItemName, expected[i].ItemName, "Expected performances not equal to actual")
+		assert.Equal(t, val.GroupName, expected[i].GroupName, "Expected performances not equal to actual")
+		assert.Equal(t, val.GenreName, expected[i].GenreName, "Expected performances not equal to actual")
+		assert.Equal(t, val.Location, expected[i].Location, "Expected performances not equal to actual")
+		assert.Equal(t, val.StartTime, expected[i].StartTime, "Expected performances not equal to actual")
+		assert.Equal(t, val.EndTime, expected[i].EndTime, "Expected performances not equal to actual")
+		assert.Equal(t, val.Duration, expected[i].Duration, "Expected performances not equal to actual")
+	}
+}
 
+func TestGetPerformersByPerformanceId(t *testing.T) {
+	// arrange
+	db := setUpTestDB(t)
+	defer db.Close()
+	dbw := internal.CreateDBWrapper(db)
+
+	testPerformance := getTestPerformance()
+	expected := getTestPerformers(3)
+
+	testPerformance, err := dbw.CreatePerformance(testPerformance)
+	require.NoError(t, err, "CreatePerformance() failed: %v", err)
+
+	for i, val := range expected {
+		expected[i], err = dbw.CreatePerformer(val)
+		require.NoError(t, err, "CreatePerformer() failed: %v", err)
+	}
+
+	for _, val := range expected {
+		err := dbw.CreateJunction(val.Id, testPerformance.Id)
+		require.NoError(t, err, "CreateJunction() failed: %v", err)
+	}
+
+	// act
+	actual, err := dbw.GetPerformersByPerformanceId(testPerformance.Id)
+	require.NoError(t, err, "GetPerformersByPerformanceId failed: %v", err)
+
+	// assert
+	assert.True(t, (len(expected) == len(actual)), "Number of returns not equal")
+	for i, val := range actual {
+		assert.Equal(t, val.Id, expected[i].Id, "Expected performers not equal to actual")
+		assert.Equal(t, val.Name, expected[i].Name, "Expected performers not equal to actual")
+		assert.Equal(t, val.Email, expected[i].Email, "Expected performers not equal to actual")
+	}
+}
+
+func TestDeletePerformanceUsingId(t *testing.T) {
+	// arrange
+	db := setUpTestDB(t)
+	defer db.Close()
+	dbw := internal.CreateDBWrapper(db)
+
+	performance := getTestPerformance()
+
+	performance, err := dbw.CreatePerformance(performance)
+	require.NoError(t, err, "CreatePerformance() has failed: %v", err)
 }

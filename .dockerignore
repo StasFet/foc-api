@@ -4,3 +4,4 @@ database/
 .sqlite
 Dockerfile
 app.exe
+.log
