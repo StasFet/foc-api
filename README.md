@@ -5,9 +5,10 @@ Hello! This is just a little project to learn how to make a REST API. I haven't 
 
 - REST API design
 - Golang
-- SQLite3
+- SQLite (from modernc.org)
 - Golang standard library's `net/http` module (I initially wanted to use gin, but decided to use this to make a more lightweight app)
 - Docker/Docker-Compose
+- Complete unit testing using Go's `testing` tool and `testify`
 
 ### Running This Application
 If for whatever reason you decide to run this application, you can easily do so with Docker Desktop. Simply open the root directory of this project in your terminal and run the following command:
@@ -19,7 +20,7 @@ Enjoy!
 ### Running Tests
 To run the unit tests and ensure everything works, you can run the following command:
 ```bash
-go test ./internal/
+go test ./internal/ -v 
 ```
 
 ## API Map

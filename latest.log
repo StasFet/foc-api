@@ -20,5 +20,13 @@
 --- PASS: TestGetPerformersByPerformanceId (0.00s)
 === RUN   TestDeletePerformanceUsingId
 --- PASS: TestDeletePerformanceUsingId (0.00s)
+=== RUN   TestDeletePerformerUsingId
+--- PASS: TestDeletePerformerUsingId (0.00s)
+=== RUN   TestDeleteJunction
+--- PASS: TestDeleteJunction (0.00s)
+=== RUN   TestUpdatePerformanceById
+--- PASS: TestUpdatePerformanceById (0.00s)
+=== RUN   TestUpdatePerformerById
+--- PASS: TestUpdatePerformerById (0.00s)
 PASS
 ok  	foc_api/internal	0.256s

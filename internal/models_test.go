@@ -296,4 +296,127 @@ func TestDeletePerformanceUsingId(t *testing.T) {
 
 	performance, err := dbw.CreatePerformance(performance)
 	require.NoError(t, err, "CreatePerformance() has failed: %v", err)
+
+	// act
+	err = dbw.DeletePerformanceById(performance.Id)
+	require.NoError(t, err, "DeletePerformanceById() has failed: %v", err)
+
+	// assert
+	retrievedPerformance, err := dbw.GetPerformanceById(performance.Id)
+	require.NoError(t, err, "GetPerformanceById() has failed: %v", err)
+	assert.Nil(t, retrievedPerformance, "Performance deletion failed!")
+}
+
+func TestDeletePerformerUsingId(t *testing.T) {
+	// arrange
+	db := setUpTestDB(t)
+	defer db.Close()
+	dbw := internal.CreateDBWrapper(db)
+
+	performer := getTestPerformer()
+
+	performer, err := dbw.CreatePerformer(performer)
+	require.NoError(t, err, "CreatePerformer() has failed: %v", err)
+
+	// act
+	err = dbw.DeletePerformerById(performer.Id)
+	require.NoError(t, err, "DeletePerformerById() has failed: %v", err)
+
+	// assert
+	retrievedPerformer, err := dbw.GetPerformerById(performer.Id)
+	require.NoError(t, err, "GetPerformanceById() has failed: %v", err)
+	assert.Nil(t, retrievedPerformer, "Performer deletion failed")
+}
+
+func TestDeleteJunction(t *testing.T) {
+	// arrange
+	db := setUpTestDB(t)
+	defer db.Close()
+	dbw := internal.CreateDBWrapper(db)
+
+	performer := getTestPerformer()
+	performances := getTestPerformances(2)
+
+	performer, err := dbw.CreatePerformer(performer)
+	require.NoError(t, err, "CreatePerformance() has failed: %v", err)
+	for i, v := range performances {
+		performances[i], err = dbw.CreatePerformance(v)
+		require.NoError(t, err, "CreatePerformance() has failed: %v", err)
+	}
+
+	for _, v := range performances {
+		err = dbw.CreateJunction(performer.Id, v.Id)
+		require.NoError(t, err, "CreateJunction() has failed: %v", err)
+	}
+
+	// act
+	err = dbw.DeleteJunction(performer.Id, performances[0].Id)
+	require.NoError(t, err, "DeleteJunction() has failed: %v", err)
+
+	actual, err := dbw.GetPerformancesByPerformerId(performer.Id)
+	require.NoError(t, err, "GetPerformanceByPerformerId() has failed: %v", err)
+
+	// assert
+	expected := []*internal.Performance{performances[1]}
+	require.Equal(t, expected, actual, "Retrieved values not equal to expected")
+}
+
+func TestUpdatePerformanceById(t *testing.T) {
+	// arrange
+	db := setUpTestDB(t)
+	defer db.Close()
+	dbw := internal.CreateDBWrapper(db)
+
+	// create 2 performances
+	testPerformances := getTestPerformances(2)
+	expected := testPerformances[1]
+	insertedPerformance := testPerformances[0]
+
+	insertedPerformance, err := dbw.CreatePerformance(insertedPerformance)
+	require.NoError(t, err, "CreatePerformance() has failed: %v", err)
+
+	// act
+	err = dbw.UpdatePerformanceById(insertedPerformance.Id, expected)
+	require.NoError(t, err, "UpdatePerformanceById() has failed: %v", err)
+	actual, err := dbw.GetPerformanceById(insertedPerformance.Id)
+	require.NoError(t, err, "GetPerformanceById() has failed; %v", err)
+
+	// assert
+	assert.NotEqual(t, expected.Id, actual.Id, "Identical Ids")
+
+	assert.Equal(t, expected.ItemName, expected.ItemName, "Expected performances not equal to actual")
+	assert.Equal(t, expected.GroupName, expected.GroupName, "Expected performances not equal to actual")
+	assert.Equal(t, expected.GenreName, expected.GenreName, "Expected performances not equal to actual")
+	assert.Equal(t, expected.Location, expected.Location, "Expected performances not equal to actual")
+	assert.Equal(t, expected.StartTime, expected.StartTime, "Expected performances not equal to actual")
+	assert.Equal(t, expected.EndTime, expected.EndTime, "Expected performances not equal to actual")
+	assert.Equal(t, expected.Duration, expected.Duration, "Expected performances not equal to actual")
+}
+
+func TestUpdatePerformerById(t *testing.T) {
+	// arrange
+	db := setUpTestDB(t)
+	defer db.Close()
+	dbw := internal.CreateDBWrapper(db)
+
+	// create 2 performances
+	testPerformers := getTestPerformers(2)
+	expected := testPerformers[1]
+	insertedPerformer := testPerformers[0]
+
+	insertedPerformer, err := dbw.CreatePerformer(insertedPerformer)
+	require.NoError(t, err, "CreatePerformer() has failed: %v", err)
+
+	// act
+	err = dbw.UpdatePerformerById(insertedPerformer.Id, expected)
+	require.NoError(t, err, "UpdatePerformerById() has failed: %v", err)
+	actual, err := dbw.GetPerformerById(insertedPerformer.Id)
+	require.NoError(t, err, "GetPerformerById() has failed; %v", err)
+
+	// assert
+	assert.NotEqual(t, expected.Id, actual.Id, "Identical Ids")
+
+	assert.Equal(t, expected.Name, actual.Name, "Expected and Actual name are different")
+	assert.Equal(t, expected.Email, actual.Email, "Expected and Actual email are different")
+
 }

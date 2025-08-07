@@ -131,7 +131,8 @@ func (api *API) getPerformanceById(w http.ResponseWriter, r *http.Request) {
 	}
 
 	performance, err := api.wrapper.GetPerformanceById(id)
-	if err != nil {
+	// performance != performance implies it is nil
+	if err != nil || performance == nil {
 		api.respondError(w, http.StatusNotFound, "Performance Not Found")
 		return
 	}
@@ -149,7 +150,7 @@ func (api *API) getPerformerById(w http.ResponseWriter, r *http.Request) {
 
 	// gets performer details from db
 	performer, err := api.wrapper.GetPerformerById(id)
-	if err != nil {
+	if err != nil || performer == nil {
 		api.respondError(w, http.StatusNotFound, "Performer Not Found")
 		return
 	}
@@ -282,13 +283,13 @@ func (api *API) updatePerformance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updatedPerformance, err := api.wrapper.UpdatePerformanceById(id, &performance)
+	err = api.wrapper.UpdatePerformanceById(id, &performance)
 	if err != nil {
 		api.respondError(w, http.StatusInternalServerError, "Error updating performance")
 		return
 	}
 
-	api.respondJSON(w, http.StatusOK, updatedPerformance)
+	api.respondJSON(w, http.StatusOK, map[string]string{"status": "success"})
 }
 
 // PUT /performers/:id - updates the performer with the specified id
@@ -312,13 +313,13 @@ func (api *API) updatePerformer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updatedPerformer, err := api.wrapper.UpdatePerformerById(id, &performer)
+	err = api.wrapper.UpdatePerformerById(id, &performer)
 	if err != nil {
 		api.respondError(w, http.StatusInternalServerError, "Error updating performer")
 		return
 	}
 
-	api.respondJSON(w, http.StatusOK, updatedPerformer)
+	api.respondJSON(w, http.StatusOK, map[string]string{"status": "success"})
 }
 
 // DELETE /performances/:id - deletes the performance with the specified id
