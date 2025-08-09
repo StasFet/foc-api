@@ -325,7 +325,7 @@ func TestDeletePerformerUsingId(t *testing.T) {
 	// assert
 	retrievedPerformer, err := dbw.GetPerformerById(performer.Id)
 	require.NoError(t, err, "GetPerformanceById() has failed: %v", err)
-	assert.Nil(t, retrievedPerformer, "Performer deletion failed")
+	assert.Nil(t, retrievedPerformer, "Performer deletion failed: %v", performer)
 }
 
 func TestDeleteJunction(t *testing.T) {

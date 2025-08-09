@@ -73,6 +73,7 @@ func (dbw *DBWrapper) GetAllPerformances() ([]*Performance, error) {
 	dbQuery := `
 		SELECT *
 		FROM performances
+		WHERE deleted = 0
 		ORDER BY id ASC
 	`
 
@@ -100,6 +101,7 @@ func (dbw *DBWrapper) GetAllPerformers() ([]*Performer, error) {
 	dbQuery := `
 		SELECT *
 		FROM performers
+		WHERE deleted = 0
 		ORDER BY id ASC
 	`
 
@@ -126,7 +128,7 @@ func (dbw *DBWrapper) GetPerformancesByPerformerId(performerId int) ([]*Performa
 		SELECT id, itemName, genreName, groupName, location, startTime, endTime
 		FROM performances AS p
 		JOIN junction AS j ON p.id = j.performance_id
-		WHERE j.performer_id = ?
+		WHERE j.performer_id = ? AND p.deleted = 0
 		ORDER BY p.id ASC
 	`
 
@@ -155,7 +157,7 @@ func (dbw *DBWrapper) GetPerformersByPerformanceId(performanceId int) ([]*Perfor
 		SELECT id, name, email
 		FROM performers AS p
 		JOIN junction AS j ON p.id = j.performer_id
-		WHERE j.performance_id = ?
+		WHERE j.performance_id = ? AND p.deleted = 0
 		ORDER BY p.id ASC
 	`
 
@@ -183,12 +185,13 @@ func (dbw *DBWrapper) GetPerformanceById(id int) (*Performance, error) {
 	dbQuery := `
 		SELECT *
 		FROM performances
-		WHERE id = ?
+		WHERE id = ? AND deleted = 0
 	`
 
+	deleted := 0
 	p := &Performance{}
 	err := dbw.db.QueryRow(dbQuery, id).
-		Scan(&p.Id, &p.ItemName, &p.GenreName, &p.GroupName, &p.Location, &p.StartTime, &p.EndTime)
+		Scan(&p.Id, &p.ItemName, &p.GenreName, &p.GroupName, &p.Location, &p.StartTime, &p.EndTime, &deleted)
 
 	if err == sql.ErrNoRows {
 		return nil, nil
@@ -203,12 +206,13 @@ func (dbw *DBWrapper) GetPerformerById(id int) (*Performer, error) {
 	dbQuery := `
 		SELECT *
 		FROM performers
-		WHERE id = ?
+		WHERE id = ? AND deleted = 0
 	`
 
+	deleted := 0
 	p := &Performer{}
 	err := dbw.db.QueryRow(dbQuery, id).
-		Scan(&p.Id, &p.Name, &p.Email)
+		Scan(&p.Id, &p.Name, &p.Email, &deleted)
 
 	if err == sql.ErrNoRows {
 		return nil, nil
@@ -222,7 +226,9 @@ func (dbw *DBWrapper) GetPerformerById(id int) (*Performer, error) {
 // Deletes the performance with the given id
 func (dbw *DBWrapper) DeletePerformanceById(id int) error {
 	dbQuery := `
-		DELETE FROM performances WHERE id = ?;
+		UPDATE performances
+		SET deleted = 1
+		WHERE id = ?
 	`
 	_, err := dbw.db.Exec(dbQuery, id)
 	if err != nil {
@@ -235,7 +241,9 @@ func (dbw *DBWrapper) DeletePerformanceById(id int) error {
 // Deletes the performer with the given id
 func (dbw *DBWrapper) DeletePerformerById(id int) error {
 	dbQuery := `
-		DELETE FROM performers WHERE id = ?;
+		UPDATE performers
+		SET deleted = 1
+		WHERE id = ?
 	`
 	_, err := dbw.db.Exec(dbQuery, id)
 	if err != nil {
@@ -249,7 +257,7 @@ func (dbw *DBWrapper) UpdatePerformanceById(id int, p *Performance) error {
 	dbQuery := `
 		UPDATE performances
 		SET itemName = ?, genreName = ?, groupName = ?, location = ?, startTime = ?, endTime = ?
-		WHERE id = ?
+		WHERE id = ? AND deleted = 0
 	`
 
 	result, err := dbw.db.Exec(dbQuery, p.ItemName, p.GenreName, p.GroupName, p.Location, p.StartTime, p.EndTime, id)
@@ -333,7 +341,8 @@ func (dbw *DBWrapper) DeleteJunction(performerId, performanceId int) error {
 // gets the head of rows and returns it as a Performance
 func getNextPerformance(rows *sql.Rows) (*Performance, error) {
 	p := &Performance{}
-	err := rows.Scan(&p.Id, &p.ItemName, &p.GenreName, &p.GroupName, &p.Location, &p.StartTime, &p.EndTime)
+	deleted := 0
+	err := rows.Scan(&p.Id, &p.ItemName, &p.GenreName, &p.GroupName, &p.Location, &p.StartTime, &p.EndTime, &deleted)
 	if err != nil {
 		return nil, err
 	}
@@ -343,7 +352,8 @@ func getNextPerformance(rows *sql.Rows) (*Performance, error) {
 // gets the head of rows and returns it as a Performer
 func getNextPerformer(rows *sql.Rows) (*Performer, error) {
 	p := &Performer{}
-	err := rows.Scan(&p.Id, &p.Name, &p.Email)
+	deleted := 0
+	err := rows.Scan(&p.Id, &p.Name, &p.Email, &deleted)
 	if err != nil {
 		return nil, err
 	}

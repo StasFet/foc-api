@@ -42,7 +42,8 @@ func createTables(db *sql.DB) error {
 			groupName TEXT NOT NULL,
 			location TEXT NOT NULL,
 			startTime DATETIME,
-			endTime DATETIME
+			endTime DATETIME,
+			deleted BOOLEAN DEFAULT 0
 		);
 	`
 
@@ -50,7 +51,8 @@ func createTables(db *sql.DB) error {
 		CREATE TABLE IF NOT EXISTS performers (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			name TEXT NOT NULL,
-			email TEXT NOT NULL
+			email TEXT NOT NULL,
+			deleted BOOLEAN DEFAULT 0
 		);
 	`
 
