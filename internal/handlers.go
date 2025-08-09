@@ -54,18 +54,18 @@ func (api *API) PerformanceHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		if r.URL.Path == "/performances" || r.URL.Path == "/performances/" {
 			// log.Println("Detected request for all performances!")
-			api.getAllPerformances(w, r)
+			api.GetAllPerformances(w, r)
 		} else if pathLength(r.URL.Path) > 2 {
 			api.GetPerformersByPerformanceId(w, r)
 		} else {
-			api.getPerformanceById(w, r)
+			api.GetPerformanceById(w, r)
 		}
 	case http.MethodPost:
 		api.CreateNewPerformance(w, r)
 	case http.MethodPut:
-		api.updatePerformance(w, r)
+		api.UpdatePerformance(w, r)
 	case http.MethodDelete:
-		api.deletePerformance(w, r)
+		api.DeletePerformance(w, r)
 	}
 }
 
@@ -75,18 +75,18 @@ func (api *API) PerformerHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		if r.URL.Path == "/performers" || r.URL.Path == "/performers/" {
-			api.getAllPerformers(w, r)
+			api.GetAllPerformers(w, r)
 		} else if pathLength(r.URL.Path) > 2 { // if pathLength >
 			api.GetPerformancesByPerformerId(w, r)
 		} else {
-			api.getPerformerById(w, r)
+			api.GetPerformerById(w, r)
 		}
 	case http.MethodPost:
 		api.CreateNewPerformer(w, r)
 	case http.MethodPut:
-		api.updatePerformer(w, r)
+		api.UpdatePerformer(w, r)
 	case http.MethodDelete:
-		api.deletePerformer(w, r)
+		api.DeletePerformer(w, r)
 	}
 }
 
@@ -94,14 +94,14 @@ func (api *API) PerformerHandler(w http.ResponseWriter, r *http.Request) {
 func (api *API) JunctionHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
-		api.createJunction(w, r)
+		api.CreateJunction(w, r)
 	case http.MethodDelete:
-		api.deleteJunction(w, r)
+		api.DeleteJunction(w, r)
 	}
 }
 
 // GET /performances - returns all performances
-func (api *API) getAllPerformances(w http.ResponseWriter, r *http.Request) {
+func (api *API) GetAllPerformances(w http.ResponseWriter, r *http.Request) {
 	performances, err := api.wrapper.GetAllPerformances()
 	if err != nil {
 		api.respondError(w, http.StatusBadRequest, "Invalid Performance ID")
@@ -112,7 +112,7 @@ func (api *API) getAllPerformances(w http.ResponseWriter, r *http.Request) {
 }
 
 // GET /performers - returns all performers
-func (api *API) getAllPerformers(w http.ResponseWriter, r *http.Request) {
+func (api *API) GetAllPerformers(w http.ResponseWriter, r *http.Request) {
 	performers, err := api.wrapper.GetAllPerformers()
 	if err != nil {
 		api.respondError(w, http.StatusBadRequest, "Invalid performer id")
@@ -123,7 +123,7 @@ func (api *API) getAllPerformers(w http.ResponseWriter, r *http.Request) {
 }
 
 // GET /performances/:id - return performance with given ID
-func (api *API) getPerformanceById(w http.ResponseWriter, r *http.Request) {
+func (api *API) GetPerformanceById(w http.ResponseWriter, r *http.Request) {
 	id, err := api.extractId(r.URL.Path)
 	if err != nil {
 		api.respondError(w, http.StatusBadRequest, "Invalid ID")
@@ -141,7 +141,7 @@ func (api *API) getPerformanceById(w http.ResponseWriter, r *http.Request) {
 }
 
 // GET /performers/:id - return performer with given ID
-func (api *API) getPerformerById(w http.ResponseWriter, r *http.Request) {
+func (api *API) GetPerformerById(w http.ResponseWriter, r *http.Request) {
 	id, err := api.extractId(r.URL.Path)
 	if err != nil {
 		api.respondError(w, http.StatusBadRequest, "Invalid ID")
@@ -213,7 +213,7 @@ func (api *API) CreateNewPerformance(w http.ResponseWriter, r *http.Request) {
 		api.respondError(w, http.StatusInternalServerError, "Failed to create performance")
 	}
 
-	api.respondJSON(w, http.StatusOK, newPerformance)
+	api.respondJSON(w, http.StatusCreated, newPerformance)
 }
 
 // POST /performers/ - Create a new performer
@@ -237,11 +237,11 @@ func (api *API) CreateNewPerformer(w http.ResponseWriter, r *http.Request) {
 		api.respondError(w, http.StatusInternalServerError, "Failed to create performer")
 	}
 
-	api.respondJSON(w, http.StatusOK, newPerformer)
+	api.respondJSON(w, http.StatusCreated, newPerformer)
 }
 
 // POST /junctions/ - creates a new performer:performance junction
-func (api *API) createJunction(w http.ResponseWriter, r *http.Request) {
+func (api *API) CreateJunction(w http.ResponseWriter, r *http.Request) {
 	junction := struct {
 		PerformerId   int `json:"performerId`
 		PerformanceId int `json:"performanceId"`
@@ -259,11 +259,11 @@ func (api *API) createJunction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	api.respondJSON(w, http.StatusOK, map[string]string{"status": "success"})
+	api.respondJSON(w, http.StatusCreated, map[string]string{"status": "success"})
 }
 
 // PUT /performances/:id - updates the performance with the specified id
-func (api *API) updatePerformance(w http.ResponseWriter, r *http.Request) {
+func (api *API) UpdatePerformance(w http.ResponseWriter, r *http.Request) {
 	var performance Performance
 
 	err := json.NewDecoder(r.Body).Decode(&performance)
@@ -293,7 +293,7 @@ func (api *API) updatePerformance(w http.ResponseWriter, r *http.Request) {
 }
 
 // PUT /performers/:id - updates the performer with the specified id
-func (api *API) updatePerformer(w http.ResponseWriter, r *http.Request) {
+func (api *API) UpdatePerformer(w http.ResponseWriter, r *http.Request) {
 	var performer Performer
 
 	err := json.NewDecoder(r.Body).Decode(&performer)
@@ -323,7 +323,7 @@ func (api *API) updatePerformer(w http.ResponseWriter, r *http.Request) {
 }
 
 // DELETE /performances/:id - deletes the performance with the specified id
-func (api *API) deletePerformance(w http.ResponseWriter, r *http.Request) {
+func (api *API) DeletePerformance(w http.ResponseWriter, r *http.Request) {
 	id, err := api.extractId(r.URL.Path)
 	if err != nil {
 		api.respondError(w, http.StatusBadRequest, "Invalid ID provided")
@@ -339,7 +339,7 @@ func (api *API) deletePerformance(w http.ResponseWriter, r *http.Request) {
 }
 
 // DELETE /performers/:id - deletes the performer with the specified id
-func (api *API) deletePerformer(w http.ResponseWriter, r *http.Request) {
+func (api *API) DeletePerformer(w http.ResponseWriter, r *http.Request) {
 	id, err := api.extractId(r.URL.Path)
 	if err != nil {
 		api.respondError(w, http.StatusBadRequest, "Invalid ID provided")
@@ -356,7 +356,7 @@ func (api *API) deletePerformer(w http.ResponseWriter, r *http.Request) {
 }
 
 // DELETE /junctions/:performerId/:performanceId
-func (api *API) deleteJunction(w http.ResponseWriter, r *http.Request) {
+func (api *API) DeleteJunction(w http.ResponseWriter, r *http.Request) {
 	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 	performerId, err := strconv.Atoi(parts[1])
 	if err != nil {

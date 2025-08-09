@@ -1,5 +1,7 @@
 === RUN   TestInitDB
 --- PASS: TestInitDB (0.00s)
+=== RUN   TestCreatePerformanceEndpoint
+--- PASS: TestCreatePerformanceEndpoint (0.00s)
 === RUN   TestCreatePerformance
 --- PASS: TestCreatePerformance (0.00s)
 === RUN   TestCreatePerformer
@@ -29,4 +31,4 @@
 === RUN   TestUpdatePerformerById
 --- PASS: TestUpdatePerformerById (0.00s)
 PASS
-ok  	foc_api/internal	0.289s
+ok  	foc_api/internal	(cached)
